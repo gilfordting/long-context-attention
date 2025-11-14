@@ -256,7 +256,7 @@ def flash_attn3_func_forward(q, k, v, dropout_p, softmax_scale, causal, window_s
                     scheduler_metadata=None,
                     num_splits=0,
                     pack_gqa=None,
-                    sm_margin=16,
+                    sm_margin=8,
                 )
     
     return out, softmax_lse
