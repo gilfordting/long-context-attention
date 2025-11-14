@@ -2,6 +2,7 @@ import math
 from typing import Optional, Tuple
 
 import torch
+
 _scaled_dot_product_flash_attention = torch.ops.aten._scaled_dot_product_flash_attention
 _scaled_dot_product_efficient_attention = torch.ops.aten._scaled_dot_product_efficient_attention
 
@@ -15,7 +16,13 @@ try:
 except ModuleNotFoundError:
     pass
 
-from yunchang.globals import HAS_FLASH_ATTN, HAS_FLASH_ATTN_HOPPER, HAS_FLASHINFER, HAS_AITER, HAS_NPU
+from yunchang.globals import (
+    HAS_AITER,
+    HAS_FLASH_ATTN,
+    HAS_FLASH_ATTN_HOPPER,
+    HAS_FLASHINFER,
+    HAS_NPU,
+)
 
 if HAS_AITER:
     import aiter
@@ -23,11 +30,16 @@ if HAS_AITER:
 
 if HAS_FLASH_ATTN:
     import flash_attn
-    from flash_attn.flash_attn_interface import _flash_attn_forward, _flash_attn_backward
+    from flash_attn.flash_attn_interface import (
+        _flash_attn_backward,
+        _flash_attn_forward,
+    )
 
 if HAS_FLASH_ATTN_HOPPER:
+    from flash_attn_interface import (
+        _flash_attn_backward as flash_attn_func_hopper_backward,
+    )
     from flash_attn_interface import _flash_attn_forward as flash_attn_forward_hopper
-    from flash_attn_interface import _flash_attn_backward as flash_attn_func_hopper_backward
     from flash_attn_interface import flash_attn_func as flash3_attn_func
 else:
     flash_attn_forward_hopper = None
@@ -244,7 +256,7 @@ def flash_attn3_func_forward(q, k, v, dropout_p, softmax_scale, causal, window_s
                     scheduler_metadata=None,
                     num_splits=0,
                     pack_gqa=None,
-                    sm_margin=2,
+                    sm_margin=16,
                 )
     
     return out, softmax_lse
